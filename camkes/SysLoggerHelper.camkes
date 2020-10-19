@@ -1,0 +1,71 @@
+/*
+ *  SysLogger helper macros
+ *
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ */
+
+#pragma once
+
+import <if_SysLogger.camkes>;
+#include "lib_macros/ForEach.h"
+
+// Component definition --------------------------------------------------------
+#define SysLogger_DECLARE_BODY()\
+    provides if_OS_Log SysLoggerRpc;
+
+#define SysLogger_DECLARE_SPOOLER_CONNECTOR(\
+    _unused_inst_,\
+    _spooler_inst_,\
+    _buf_size_,\
+    _unused_num_\
+)\
+    dataport  Buf(_buf_size_)       _spooler_inst_ ##_## port;\
+    emits     DataAvailableEvent    _spooler_inst_ ##_## DataAvailable;
+
+#define SysLogger_DECLARE_SPOOLER_CONNECTORS(...)\
+    FOR_EACH_1P(SysLogger_DECLARE_SPOOLER_CONNECTOR, UNUSED, __VA_ARGS__)
+
+// Spooler definition ----------------------------------------------------------
+// this is not yet used, in the future this will be used by a spooler component
+// to declare within its component's definition the necessary camkes objects
+// to have a connection to the system logger:
+// - a dataport which will contain a FIFO (see FifoDataport.h) of log messages
+// - a signal (from SysLogger to Spooler) for notifying new logs in to the FIFO
+#define SysLogger_SPOOLER_DECLARE_CONNECTOR(\
+    _spooler_inst_,\
+    _buf_size_\
+)\
+    dataport    Buf(_buf_size_)     _syslogger_inst_ ##_## port;\
+    consumes    DataAvailableEvent  _syslogger_inst_ ##_## EventHasData;
+
+// Client definition -----------------------------------------------------------
+#define SysLogger_CLIENT_DECLARE_CONNECTOR(\
+    _syslogger_inst_\
+)\
+    uses        if_OS_Log           _syslogger_inst_ ## _Rpc;
+
+// Connections -----------------------------------------------------------------
+// this is not yet used, in the future this will be used by the SysLogger
+// component to declare its connections to the spooler when declaring a
+// SysLogger component instance with SysLogger_INSTANCE_DECLARE() in a
+// composition
+#define SysLogger_INSTANCE_CONNECT_SPOOLER(\
+    _syslogger_inst_,\
+    _spooler_inst_,\
+    _unused_num_\
+)\
+    connection seL4SharedData conn ##_## _spooler_inst_ ##_## _syslogger_inst_ ##_## port(\
+        from    _syslogger_inst_._spooler_inst_ ##_## port,\
+        to      _spooler_inst_._syslogger_inst_ ##_## port);\
+    connection  seL4NotificationNative conn ##_## _syslogger_inst_ ##_## _spooler_inst_ ##_## notification(\
+        from    _syslogger_inst_._spooler_inst_ ##_## DataAvailable,\
+        to      _spooler_inst_._syslogger_inst_ ##_## EventHasData);
+
+#define SysLogger_INSTANCE_CONNECT_CLIENT(\
+    _syslogger_inst_,\
+    _component_to_connect_,\
+    _unsused_num_\
+)\
+    connection seL4RPCCall conn ##_## _component_to_connect_ ##_## _syslogger_inst_ ##_## rpc(\
+        from    _component_to_connect_._syslogger_inst_ ##_## Rpc,\
+        to      _syslogger_inst_.SysLoggerRpc);

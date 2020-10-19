@@ -1,0 +1,91 @@
+/*
+ *  System Logger
+ *
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ */
+
+#include "SysLoggerHelper.camkes"
+
+// Definition and declaration of component -------------------------------------
+/*
+ * To be used when the SysLogger is not connected to any spooler but rather it
+ * processes the logs internally (e.g. acting as printf serializer)
+ */
+#define SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(\
+    _name_\
+)\
+component _name_ {\
+    SysLogger_DECLARE_BODY()\
+}
+
+/*
+ *   To be used when the SysLogger is connected to spoolers
+ *
+ *      SysLogger_COMPONENT_DEFINE(
+ *          <name>,
+ *          <spooler_instance>, <buf_size>,
+ *          <spooler_instance>, <buf_size>,
+ *          ...
+ *      )
+ */
+#define SysLogger_COMPONENT_DEFINE(\
+    _name_,\
+    ...\
+)\
+component _name_ {\
+    SysLogger_DECLARE_BODY()\
+\
+    SysLogger_DECLARE_SPOOLER_CONNECTORS(__VA_ARGS__)\
+}
+
+/*
+ *   To be used when the SysLogger is connected to spoolers
+ *
+ *      SysLogger_INSTANCE_DECLARE(
+ *          <name>, <inst>,
+ *          <spooler_instance>,
+ *          <spooler_instance>,
+ *          ...
+ *      )
+ */
+#define SysLogger_INSTANCE_DECLARE(\
+    _name_,\
+    _inst_,\
+    ...\
+)\
+    component _name_  _inst_;\
+    SysLogger_INSTANCE_CONNECT_SPOOLERS(_inst_, __VA_ARGS__)
+
+// Backend connections ---------------------------------------------------------
+/*
+ *      SysLogger_INSTANCE_CONNECT_SPOOLERS(
+ *          <inst>,
+ *          <spooler_instance>,
+ *          <spooler_instance>,
+ *          ...
+ *      )
+ */
+#define SysLogger_INSTANCE_CONNECT_SPOOLERS(\
+    _syslogger_inst_,\
+    ...\
+)\
+    FOR_EACH_0P(SysLogger_INSTANCE_CONNECT_SPOOLER,\
+                _syslogger_inst_,\
+                __VA_ARGS__)
+
+// Client connections ----------------------------------------------------------
+/*
+ *      SysLogger_INSTANCE_CONNECT_CLIENTS(
+ *          <inst>,
+ *          <client_instance>,
+ *          <client_instance>,
+ *          ...
+ *      )
+ */
+#define SysLogger_INSTANCE_CONNECT_CLIENTS(\
+    _syslogger_inst_,\
+    ...\
+)\
+    FOR_EACH_0P(SysLogger_INSTANCE_CONNECT_CLIENT,\
+                _syslogger_inst_,\
+                __VA_ARGS__)

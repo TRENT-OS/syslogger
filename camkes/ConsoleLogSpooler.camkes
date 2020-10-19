@@ -1,0 +1,19 @@
+/*
+ *  Console Log Spooler
+ *
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ *
+ */
+
+#include "SysLoggerHelper.camkes"
+
+//------------------------------------------------------------------------------
+// Component definitions
+#define ConsoleLogSpooler_DECLARE_BODY(_syslog_inst_, _buf_size_)\
+    control;\
+    SysLogger_SPOOLER_DECLARE_CONNECTOR(_syslog_inst_, _buf_size_)
+
+#define ConsoleLogSpooler_DEFINE_COMPONENT(_name_, _syslog_inst_, _buf_size_)\
+component _name_ {\
+    ConsoleLogSpooler_DECLARE_BODY(_syslog_inst_, _buf_size_)\
+}
