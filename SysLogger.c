@@ -9,10 +9,19 @@
 
 #include "camkes.h"
 
-
 //==============================================================================
 // CAmkES component
 //==============================================================================
+
+OS_Error_t
+SysLoggerRpc_log(unsigned int level, char const* msg)
+{
+    // At the moment the system logger is a dummy printf serializer, in future
+    // we may still keep this behavior when no configuration is specified (no
+    // logger chain, no spoolers)
+    Debug_PRINT(level, msg);
+    return OS_SUCCESS;
+}
 
 //---------------------------------------------------------------------------
 // called before any other init function is called. Full runtime support is not

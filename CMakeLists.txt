@@ -27,6 +27,8 @@ function(DeclareCAmkESComponent_SysLogger
 
     DeclareCAmkESComponent(
         ${name}
+        INCLUDES
+            "${CMAKE_CURRENT_FUNCTION_LIST_DIR}"
         SOURCES
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/SysLogger.c
         C_FLAGS
