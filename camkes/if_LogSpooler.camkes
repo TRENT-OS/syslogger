@@ -1,0 +1,69 @@
+/*
+ * LogSpooler interface
+ *
+ * Copyright (C) 2021, HENSOLDT Cyber GmbH
+ *
+ * The LogSpooler interface consists of
+ *  - a dataport which will contains a a message queue (FIFO)
+ *  - a signal to report there are new message in the queue
+ *
+ */
+
+#pragma once
+
+
+//------------------------------------------------------------------------------
+#define IF_LOGSPOOLER_UPPER_INTERFACE_FIELDS(\
+    _prefix_, \
+    _buf_size_) \
+    \
+    dataport  Buf(_buf_size_)       _prefix_ ##_## port;\
+    emits     DataAvailableEvent    _prefix_ ##_## event_newMes;
+
+
+//------------------------------------------------------------------------------
+#define IF_LOGSPOOLER_LOWER_INTERFACE_FIELDS( \
+    _prefix_, \
+    _buf_size_) \
+    \
+    dataport    Buf(_buf_size_)     _prefix_ ##_## port; \
+    consumes    DataAvailableEvent  _prefix_ ##_## event_newMes;
+
+
+//------------------------------------------------------------------------------
+// connect IF_LOGSPOOLER between two components. LogSpooler are supposed to be
+// connected as a 1:1 connection, neither the dataport nor the event is shared
+// with anything else.
+#define IF_LOGSPOOLER_CONNECT( \
+    _inst_upper_, \
+    _inst_uppdate_field_prefix_, \
+    _inst_lower_, \
+    _inst_lower_field_prefix_) \
+    \
+    connection seL4SharedData \
+        conn_##_inst_upper_##_##_inst_lower_##_port( \
+            from _inst_upper_._inst_uppdate_field_prefix_##_port, \
+            to   _inst_lower_._inst_lower_field_prefix_##_port); \
+    \
+    connection seL4NotificationNative \
+        conn_##_inst_upper_##_##_inst_lower_##_event( \
+            from _inst_upper_._inst_uppdate_field_prefix_##event_newMes, \
+            to   _inst_lower_._inst_lower_field_prefix_##event_newMes);
+
+
+//------------------------------------------------------------------------------
+#include "lib_macros/ForEach.h"
+
+#define _ForEachAdater_IF_LOGSPOOLER_UPPER_INTERFACE_FIELDS( \
+    _unused_inst_, \
+    _prefix_, \
+    _buf_size_, \
+    _unused_num_) \
+    \
+    IF_LOGSPOOLER_UPPER_INTERFACE_FIELDS(_prefix_, _buf_size_)
+
+#define IF_LOGSPOOLER_MULTIPLE_UPPER_INTERFACE_FIELDS(...)\
+    FOR_EACH_1P( \
+        _ForEachAdater_IF_LOGSPOOLER_UPPER_INTERFACE_FIELDS, \
+        UNUSED, \
+        __VA_ARGS__)

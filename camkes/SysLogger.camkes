@@ -4,88 +4,72 @@
  *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
-#include "SysLoggerHelper.camkes"
+#include "if_LogSpooler.camkes"
 
-// Definition and declaration of component -------------------------------------
-/*
+
+
+// Spooler definition ----------------------------------------------------------
+// this is not yet used, in the future this will be used by a spooler component
+// to declare within its component's definition the necessary camkes objects
+// to have a connection to the system logger:
+// - a dataport which will contain a FIFO (see FifoDataport.h) of log messages
+// - a signal (from SysLogger to Spooler) for notifying new logs in to the FIFO
+#define SysLogger_SPOOLER_DECLARE_CONNECTOR(\
+    _spooler_inst_,\
+    _buf_size_\
+)\
+    dataport    Buf(_buf_size_)     _syslogger_inst_ ##_## port;\
+    consumes    DataAvailableEvent  _syslogger_inst_ ##_## EventHasData;
+
+// Client definition -----------------------------------------------------------
+#define SysLogger_CLIENT_DECLARE_CONNECTOR(\
+    _prefix_\
+)\
+    uses if_OS_Log _prefix_##_rpc;
+
+
+#define SysLogger_INSTANCE_CONNECT_CLIENT(\
+    _syslogger_inst_,\
+    _component_to_connect_,\
+    _unsused_num_\
+)\
+    connection seL4RPCCall \
+        conn_##_component_to_connect_##_##_syslogger_inst_##_rpc(\
+            from _component_to_connect_._syslogger_inst_##_rpc,\
+            to   _syslogger_inst_.SysLoggerRpc);
+
+
+//------------------------------------------------------------------------------
  * To be used when the SysLogger is not connected to any spooler but rather it
  * processes the logs internally (e.g. acting as printf serializer)
  */
 #define SysLogger_COMPONENT_DEFINE_NO_SPOOLERS(\
-    _name_\
-)\
-component _name_ {\
-    SysLogger_DECLARE_BODY()\
-}
+    _name_) \
+    \
+    component _name_ { \
+        provides if_OS_Log SysLogger_rpc; \
+    }
 
-/*
- *   To be used when the SysLogger is connected to spoolers
- *
- *      SysLogger_COMPONENT_DEFINE(
- *          <name>,
- *          <spooler_instance>, <buf_size>,
- *          <spooler_instance>, <buf_size>,
- *          ...
- *      )
- */
-#define SysLogger_COMPONENT_DEFINE(\
-    _name_,\
-    ...\
-)\
-component _name_ {\
-    SysLogger_DECLARE_BODY()\
-\
-    SysLogger_DECLARE_SPOOLER_CONNECTORS(__VA_ARGS__)\
-}
+//------------------------------------------------------------------------------
+// To be used when the SysLogger is connected to spoolers:
+//    SysLogger_COMPONENT_DEFINE(
+//        <name>,
+//        <interface_prefix>, <buf_size>,
+//        <interface_prefix>, <buf_size>,
+//        ...
+//    )
+#define SysLogger_COMPONENT_DEFINE( \
+    _name_, \
+    ... ) \
+    \
+    component _name_ { \
+        provides if_OS_Log SysLogger_rpc; \
+        IF_LOGSPOOLER_MULTIPLE_UPPER_INTERFACE_FIELDS(__VA_ARGS__) \
+    }
 
-/*
- *   To be used when the SysLogger is connected to spoolers
- *
- *      SysLogger_INSTANCE_DECLARE(
- *          <name>, <inst>,
- *          <spooler_instance>,
- *          <spooler_instance>,
- *          ...
- *      )
- */
-#define SysLogger_INSTANCE_DECLARE(\
-    _name_,\
-    _inst_,\
-    ...\
-)\
-    component _name_  _inst_;\
-    SysLogger_INSTANCE_CONNECT_SPOOLERS(_inst_, __VA_ARGS__)
 
-// Backend connections ---------------------------------------------------------
-/*
- *      SysLogger_INSTANCE_CONNECT_SPOOLERS(
- *          <inst>,
- *          <spooler_instance>,
- *          <spooler_instance>,
- *          ...
- *      )
- */
-#define SysLogger_INSTANCE_CONNECT_SPOOLERS(\
-    _syslogger_inst_,\
-    ...\
-)\
-    FOR_EACH_0P(SysLogger_INSTANCE_CONNECT_SPOOLER,\
-                _syslogger_inst_,\
-                __VA_ARGS__)
-
-// Client connections ----------------------------------------------------------
-/*
- *      SysLogger_INSTANCE_CONNECT_CLIENTS(
- *          <inst>,
- *          <client_instance>,
- *          <client_instance>,
- *          ...
- *      )
- */
-#define SysLogger_INSTANCE_CONNECT_CLIENTS(\
-    _syslogger_inst_,\
-    ...\
-)\
-    FOR_EACH_0P(SysLogger_INSTANCE_CONNECT_CLIENT,\
-                _syslogger_inst_,\
-                __VA_ARGS__)
+//------------------------------------------------------------------------------
+// declare a SysLogger instance
+//    component _name_  _inst_;
+//     IF_LOGSPOOLER_CONNECT(_inst_, _prefix_, _spooler_inst_1, _spooler_inst_1_prefix)
+//     IF_LOGSPOOLER_CONNECT(_inst_, _prefix_, _spooler_inst_2, _spooler_inst_2_prefix)
