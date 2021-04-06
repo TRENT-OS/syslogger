@@ -23,7 +23,7 @@
 
 typedef struct
 {
-    SysLogger_LogFunc_t logFunc;;
+    SysLogger_LogFunc_t logFunc;
 }
 SysLoggerClient;
 

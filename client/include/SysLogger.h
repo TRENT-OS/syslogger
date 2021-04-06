@@ -24,17 +24,11 @@
 #   include SysLogger_XSTR(SysLogger_CONFIG_H_FILE)
 #endif
 
-// The following limit is calculated starting from an empirical measurement of
-// the available amount of bytes for a message in the log() RPC.
-// seL4_IPCBufferSizeBits determines the size of the IPC buffer expressed in
-// bits (for example, for the empirical test that has been done, in that 32 bit
-// architecture, it was 9, that means 2⁹ = 512 bytes for the IPC buffer).
-// It was found, by dichotomic re-attempts, that the remaining bytes for a
-// message in the log() RPC were 480. Instead of defining SysLogger_MAX_MSG_SIZE
-// simply as 480 it is preferred to keep the proportion as it it would increase
-// (double) when for example switching to a 64 bits architecture.
-// 480 is 120 memory words therefore we shall consider this datum and multiply
-// it by a coefficient that is the amount of bytes in a memory word.
+// CAmkES RPC functions use the seL4 kernel's IPC buffer to pass parameters, in
+// our case a string. The IPC buffer size is determined by the kernel constant
+// 'seL4_IPCBufferSizeBits'. On 32-bit architectures it is 9, so the IPC buffer
+// is 512 (= 2^9) byte and the usable size of the buffer in this case would be
+// 480 byte.
 #define SysLogger_MAX_MSG_SIZE   (120 * WORD_BIT/CHAR_BIT)
 
 #if !defined(SysLogger_Config_MSG_SIZE)
