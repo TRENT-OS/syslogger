@@ -29,7 +29,12 @@
 // 'seL4_IPCBufferSizeBits'. On 32-bit architectures it is 9, so the IPC buffer
 // is 512 (= 2^9) byte and the usable size of the buffer in this case would be
 // 480 byte.
-#define SysLogger_MAX_MSG_SIZE   (120 * WORD_BIT/CHAR_BIT)
+#if !defined(CHAR_BIT) || CHAR_BIT == 0
+// in this case we assume 32-bit architecture (the smallest supported)
+#   define SysLogger_MAX_MSG_SIZE   480
+#else
+#   define SysLogger_MAX_MSG_SIZE   (120 * WORD_BIT/CHAR_BIT)
+#endif
 
 #if !defined(SysLogger_Config_MSG_SIZE)
 #   error "SysLogger_Config_MSG_SIZE must be defined"
