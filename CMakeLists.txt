@@ -6,6 +6,19 @@
 
 cmake_minimum_required(VERSION 3.17)
 
+# enable new behavior introduced in CMake 3.13, where relative paths will be
+# converted into absolute paths in target_sources(INTERFACE ....)
+cmake_policy(SET CMP0076 NEW)
+
+project(syslogger C)
+
+add_library(${PROJECT_NAME} INTERFACE)
+
+target_include_directories(${PROJECT_NAME}
+    INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}
+)
+
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/client")
 
 CAmkESAddImportPath(camkes)
@@ -26,6 +39,9 @@ function(DeclareCAmkESComponent_SysLogger
     name
     system_config_lib
 )
+    if (OS_Logger_CONFIG_H_FILE)
+        set(SysLogger_CONFIG_H_FILE ${OS_Logger_CONFIG_H_FILE})
+    endif()
 
     DeclareCAmkESComponent(
         ${name}
@@ -36,6 +52,7 @@ function(DeclareCAmkESComponent_SysLogger
         C_FLAGS
             -Wall
             -Werror
+            -DSysLogger_CONFIG_H_FILE=${SysLogger_CONFIG_H_FILE}
         LIBS
             ${system_config_lib}
             os_core_api

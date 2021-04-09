@@ -7,7 +7,12 @@
 #include "OS_Error.h"
 #include "lib_debug/Debug.h"
 
+#include "SysLogger.h"
+
 #include "camkes.h"
+
+// Ensure that the configuration is compatible with the limits.
+Debug_STATIC_ASSERT(SysLogger_Config_MSG_SIZE <= SysLogger_MAX_MSG_SIZE);
 
 //==============================================================================
 // CAmkES component

@@ -14,7 +14,8 @@
 #include "OS_Error.h"
 #include "lib_debug/Debug.h"
 
-#include <limits.h>
+#include "sel4/types.h"
+#include "sel4/constants.h"
 
 #if !defined(SysLogger_CONFIG_H_FILE)
 #   error a configuration file must be provided!
@@ -25,17 +26,12 @@
 #endif
 
 // CAmkES RPC functions use the seL4 kernel's IPC buffer to pass parameters, in
-// our case a string. The IPC buffer size is determined by the kernel constant
-// 'seL4_IPCBufferSizeBits'. On 32-bit architectures it is 9, so the IPC buffer
-// is 512 (= 2^9) byte and the usable size of the buffer in this case would be
-// 480 byte.
-#define SysLogger_MAX_MSG_SIZE   480
-
-#if !defined(SysLogger_Config_MSG_SIZE)
-#   error "SysLogger_Config_MSG_SIZE must be defined"
-#elif SysLogger_Config_MSG_SIZE > SysLogger_MAX_MSG_SIZE
-#   error "SysLogger_Config_MSG_SIZE exceeds RPC call limits"
-#endif
+// our case a string. The available IPC buffer size is determined by the kernel
+// constant seL4_MsgMaxLength in memory words (currently 120), that means that
+// the total amount of bytes available would be:
+// seL4_MsgMaxLength * sizeof(seL4_Word) = 480 bytes. In case of 64-bit
+// architecture would be therefore 960 bytes.
+#define SysLogger_MAX_MSG_SIZE   (seL4_MsgMaxLength * sizeof(seL4_Word))
 
 /**
  * @brief log function type
