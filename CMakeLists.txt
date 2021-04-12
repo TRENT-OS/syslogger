@@ -70,9 +70,6 @@ endfunction()
 #   <name>
 #       component instance name
 #
-#   <config_file>
-#       C file with SysLog configuration
-#
 #   <system_config_lib>
 #       system config library
 #
