@@ -17,7 +17,11 @@ target_include_directories(${PROJECT_NAME}
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/client")
 
+if(SDK_USE_CAMKES)
+
 CAmkESAddImportPath(camkes)
+
+endif()
 
 #-------------------------------------------------------------------------------
 #
