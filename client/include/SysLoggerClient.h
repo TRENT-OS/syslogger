@@ -21,11 +21,13 @@
 #if defined(Debug_Config_PRINT_TO_LOG_SERVER)
 #define Debug_PRINT__(LEVEL, ...)\
 {\
-    OS_Error_t err = OS_ERROR_GENERIC;\
-    err = SysLoggerClient_log(LEVEL, __VA_ARGS__);\
-    if (OS_SUCCESS != err)\
+    OS_Error_t _Debug_PRINT__err = OS_ERROR_GENERIC;\
+    \
+    _Debug_PRINT__err = SysLoggerClient_log(LEVEL, __VA_ARGS__);\
+    if (OS_SUCCESS != _Debug_PRINT__err)\
     {\
-        printf("SysLoggerClient_log failed with error code %d\n", err);\
+        printf("SysLoggerClient_log failed with error code %d\n",\
+                _Debug_PRINT__err);\
     }\
 }
 #endif
