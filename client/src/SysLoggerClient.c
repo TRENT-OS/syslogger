@@ -1,7 +1,7 @@
 /*
  *  System Logger Client
  *
- *  Copyright (C) 2021, Hensoldt Cyber GmbH
+ *  Copyright (C) 2021, HENSOLDT Cyber GmbH
  */
 
 // The following is to avoid recursion. You can't send messages from SysLogger
