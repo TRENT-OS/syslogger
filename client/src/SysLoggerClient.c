@@ -105,11 +105,11 @@ SysLoggerClient_log(unsigned logLevel, const char* format, ...)
     }
     if (err >= SysLogger_Config_MSG_SIZE)
     {
-        Debug_LOG_ERROR("%s: could not format the message correctly because of buffer too small (%d vs %d)",
-                        __func__, err, SysLogger_Config_MSG_SIZE);
+        Debug_LOG_ERROR("%s: could not format the message correctly because of buffer too small (%d vs %zu)",
+                        __func__, err, (size_t)SysLogger_Config_MSG_SIZE);
         Debug_PRINT(logLevel,
-                    "%s: could not format the message correctly because of buffer too small (%d vs %d), message was:\n    '%s'\n",
-                    __func__, err, SysLogger_Config_MSG_SIZE, msg);
+                    "%s: could not format the message correctly because of buffer too small (%d vs %zu), message was:\n    '%s'\n",
+                    __func__, err, (size_t)SysLogger_Config_MSG_SIZE, msg);
         return OS_ERROR_BUFFER_TOO_SMALL;
     }
     self->logFunc(logLevel, msg);

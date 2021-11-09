@@ -31,7 +31,7 @@
 // the total amount of bytes available would be:
 // seL4_MsgMaxLength * sizeof(seL4_Word) = 480 bytes. In case of 64-bit
 // architecture would be therefore 960 bytes.
-#define SysLogger_MAX_MSG_SIZE   (seL4_MsgMaxLength * sizeof(seL4_Word))
+#define SysLogger_MAX_MSG_SIZE ((size_t)(seL4_MsgMaxLength * sizeof(seL4_Word)))
 
 /**
  * @brief log function type
