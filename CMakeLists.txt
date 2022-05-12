@@ -15,7 +15,7 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/client")
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/client" EXCLUDE_FROM_ALL)
 
 if(SDK_USE_CAMKES)
 
